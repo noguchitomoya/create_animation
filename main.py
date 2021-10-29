@@ -19,13 +19,16 @@ def zscore(x, axis=None):
     return zscore
 
 
-def create_animation(file_name, score):
+def create_animation(file_name, score, is_random):
+    if is_random:
+        random_str = "_random"
+    else:
+        random_str = ""
     fig = plt.figure()
     joint_feature = np.load(file_name)
     for i in range(joint_feature.shape[0]):
-        # joint_feature[i] = min_max_normalization(joint_feature[i])
-        joint_feature[i] = zscore(joint_feature[i])
-
+        joint_feature[i] = min_max_normalization(joint_feature[i])
+        # joint_feature[i] = zscore(joint_feature[i])
 
     joint_feature = joint_feature.transpose(1, 0, 2)
     x = np.arange(joint_feature.shape[1])
@@ -42,23 +45,48 @@ def create_animation(file_name, score):
                                     repeat_delay=1000)
     plt.colorbar()
     if "1st" in file_name:
-        output_file_name = str(score) + "_1st_anim"
+        output_file_name = str(score) + "_1st_anim" + random_str
     elif "2nd" in file_name:
-        output_file_name = str(score) + "_2nd_anim"
+        output_file_name = str(score) + "_2nd_anim" + random_str
     elif "3rd" in file_name:
-        output_file_name = str(score) + "_3rd_anim"
+        output_file_name = str(score) + "_3rd_anim" + random_str
     else:
         output_file_name = "unknown"
 
-    ani.save(output_file_name + ".gif", writer="Pillow")
-    ani.save(output_file_name + ".mp4", writer="ffmpeg")
+    ani.save("./OutputAnimation/" + output_file_name + ".gif", writer="Pillow")
+    ani.save("./OutputAnimation/" + output_file_name + ".mp4", writer="ffmpeg")
     plt.show()
 
 
+# def distribution(file_name):
+#     joint_feature = np.load(file_name)
+#     for i in range(joint_feature.shape[0]):
+#         min = joint_feature[i].min()
+#         max= joint_feature.max()
+
+def show_hist(file_name):
+    joint_feature = np.load(file_name)[0]
+    joint_feature=joint_feature.flatten()
+    fig = plt.figure()
+    ax = fig.add_subplot(1, 1, 1)
+
+
+    ax.hist(joint_feature,bins=500)
+    ax.set_title('joint_feature  histgram')
+    ax.set_xlabel('x')
+    ax.set_ylabel('freq')
+    fig.show()
+
 if __name__ == '__main__':
-    score = 30
+    is_random =False
+    if is_random:
+        random_str = "_random"
+    else:
+        random_str = ""
+    score = 20
     print("start!!")
-    create_animation('./DataDir/joint_1st_' + str(score) + '.npy', score)
-    create_animation('./DataDir/joint_2nd_' + str(score) + '.npy', score)
-    create_animation('./DataDir/joint_3rd_' + str(score) + '.npy', score)
+    show_hist('./DataDir/joint_1st_' + str(score) + random_str + '.npy')
+    # create_animation('./DataDir/joint_1st_' + str(score) + random_str + '.npy', score, is_random)
+    # create_animation('./DataDir/joint_2nd_' + str(score) + random_str + '.npy', score, is_random)
+    # create_animation('./DataDir/joint_3rd_' + str(score) + random_str + '.npy', score, is_random)
     print("end!!!")
